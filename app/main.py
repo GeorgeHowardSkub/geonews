@@ -1,16 +1,21 @@
-# This is a sample Python script.
+from fastapi import FastAPI
+from app.news_fetcher import fetch_headlines
+from app.location_parser import extract_locations
+from app.geocoder import get_coordinates
+app = FastAPI()
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
+@app.get("/news")
+def news_with_locations(q: str = "world"):
+    articles = fetch_headlines(query=q)
+    results = []
 
+    for article in articles:
+        locations = extract_locations(article.get("title", ""))
+        coords = [get_coordinates(loc) for loc in locations if get_coordinates(loc)]
+        results.append({
+            "title": article["title"],
+            "url": article["url"],
+            "locations": coords
+        })
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
-if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    return results

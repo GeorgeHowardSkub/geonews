@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+requests
+geopy
+geotext
+python-dotenv
