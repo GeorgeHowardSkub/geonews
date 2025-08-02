@@ -17,9 +17,9 @@ spec:
         image: ghcr.io/<username>/geonews:latest
         ports:
         - containerPort: 8000
-      env:
-        - name: NEWS_API_KEY
-          value: "<your-actual-newsapi-key>"
+        env:
+          - name: NEWS_API_KEY
+            value: "<your-actual-newsapi-key>"
       imagePullSecrets:
       - name: ghcr-secret
 
