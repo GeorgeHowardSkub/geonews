@@ -3,7 +3,7 @@ import os
 
 NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
-def fetch_headlines(query="world", language="en", limit=100):
+def fetch_headlines(query="world", language="en", limit=10):
     url = "https://newsapi.org/v2/everything"
     params = {
         "q": query,

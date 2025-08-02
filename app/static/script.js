@@ -29,7 +29,7 @@ function addMarkers(data) {
 
 function searchNews() {
   const query = document.getElementById("searchBox").value || "world";
-  fetch(`http://127.0.0.1:8000/news?q=${encodeURIComponent(query)}`)
+  fetch(`/news?q=${encodeURIComponent(query)}`)
     .then(response => response.json())
     .then(data => {
       clearMarkers();
