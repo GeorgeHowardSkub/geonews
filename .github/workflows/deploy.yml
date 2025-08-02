@@ -42,5 +42,5 @@ jobs:
 
     - name: Deploy to EKS
       run: |
-        kubectl set image deployment/geonews-deployment geonews=ghcr.io/${{ github.repository }}:latest
+        kubectl set image deployment/geonews-deployment geonews=ghcr.io/georgehowardskub/geonews:latest
         kubectl rollout status deployment/geonews-deployment
