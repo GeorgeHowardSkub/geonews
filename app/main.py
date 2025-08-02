@@ -3,10 +3,12 @@ import time
 
 import logging.config
 from fastapi import FastAPI
-from app.news_fetcher import fetch_headlines
-from app.location_parser import extract_locations
-from app.geocoder import get_coordinates
-from app.logging_config import LOGGING_CONFIG
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
+from news_fetcher import fetch_headlines
+from location_parser import extract_locations
+from geocoder import get_coordinates
+from logging_config import LOGGING_CONFIG
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -22,6 +24,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+# Serve index.html manually at root
+@app.get("/")
+def root():
+    return FileResponse("static/index.html")
 
 @app.get("/news")
 def news_with_locations(q: str = "world"):

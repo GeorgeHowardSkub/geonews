@@ -17,7 +17,9 @@ Create a .env file (based on .env.example):
 'NEWS_API_KEY=your_newsapi_key_here'
 
 ### Run the app locally 
-'uvicorn app.main:app --reload'
+docker build -t geonews:latest .
+docker run -p 8000:8000 -e NEWS_API_KEY=your_api_key geonews:latest
+
 
 Visit:
 

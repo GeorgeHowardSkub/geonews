@@ -1,6 +1,7 @@
 fastapi
 uvicorn
 requests
+httpx
 geopy
 geotext
 python-dotenv
