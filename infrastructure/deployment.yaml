@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: geonews-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: geonews
+  template:
+    metadata:
+      labels:
+        app: geonews
+    spec:
+      containers:
+      - name: geonews
+        image: ghcr.io/<username>/geonews:latest
+        ports:
+        - containerPort: 8000
+      env:
+        - name: NEWSAPI_KEY
+          value: "<your-actual-newsapi-key>"
+      imagePullSecrets:
+      - name: ghcr-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: geonews-service
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8000
+  selector:
+    app: geonews
