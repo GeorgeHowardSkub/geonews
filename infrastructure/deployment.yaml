@@ -18,7 +18,7 @@ spec:
         ports:
         - containerPort: 8000
       env:
-        - name: NEWSAPI_KEY
+        - name: NEWS_API_KEY
           value: "<your-actual-newsapi-key>"
       imagePullSecrets:
       - name: ghcr-secret
