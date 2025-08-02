@@ -27,7 +27,7 @@ jobs:
 
     - name: Push to GHCR
       run: |
-        IMAGE_NAME=ghcr.io/${{ github.repository }}:latest
+        IMAGE_NAME=ghcr.io/georgehowardskub/geonews:latest
         docker push $IMAGE_NAME
 
     - name: Configure AWS credentials
