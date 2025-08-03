@@ -35,40 +35,6 @@ async def fetch_news_periodically():
 def fetch_news_and_cache(query):
     print("Fetching fresh news...")
     articles = fetch_headlines(query)
-    news_cache[query] = articles
-    news_cache["last_updated"] = datetime.utcnow()
-    print(f"Fetched {len(articles)} articles at {news_cache['last_updated']} for {query}")
-
-app = FastAPI(lifespan=lifespan)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], #TODO: change this to web address
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.mount("/static", StaticFiles(directory="static"), name="static")
-
-news_cache = {
-    "world": [],
-    "last_updated": None
-}
-
-# Serve index.html manually at root
-@app.get("/")
-def root():
-    return FileResponse("static/index.html")
-
-@app.get("/news")
-def news_with_locations(q: str = "world"):
-    start_time = time.time()
-    logging.debug(f"Fetching news for query: '{q}'")
-    if q not in news_cache:
-        fetch_news_and_cache(q)
-    articles = news_cache[q]
-    logging.debug(f"Fetched {len(articles)} articles")
     results = []
 
     for article in articles:
@@ -84,6 +50,49 @@ def news_with_locations(q: str = "world"):
                 "url": article["url"],
                 "locations": coords
             })
+
+    news_cache[query] = {
+        "articles": articles,
+        "locations": results,
+        "last_updated": datetime.utcnow()
+    }
+
+    print(f"Fetched and processed {len(results)} articles for '{query}'")
+
+app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], #TODO: change this to web address
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+news_cache = {
+    "world": {
+        "articles": [],         # raw articles if needed
+        "locations": [],        # final locations
+        "last_updated": None
+    }
+}
+
+# Serve index.html manually at root
+@app.get("/")
+def root():
+    return FileResponse("static/index.html")
+
+@app.get("/news")
+def news_with_locations(q: str = "world"):
+    start_time = time.time()
+    logging.debug(f"Fetching news for query: '{q}'")
+    if q not in news_cache:
+        fetch_news_and_cache(q)
+
+    results = news_cache[q]["locations"]
+    logging.debug(f"Returning {len(results)} processed articles")
 
     duration = time.time() - start_time
     logging.debug(f"Finished processing in {duration:.2f} seconds")
