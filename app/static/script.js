@@ -29,13 +29,20 @@ function addMarkers(data) {
 
 function searchNews() {
   const query = document.getElementById("searchBox").value || "world";
+
+  clearMarkers();
+  document.getElementById("status").textContent = "Searching...";
+
   fetch(`/news?q=${encodeURIComponent(query)}`)
     .then(response => response.json())
     .then(data => {
-      clearMarkers();
       addMarkers(data);
+      document.getElementById("status").textContent = `Found ${data.length} articles`;
     })
-    .catch(err => console.error("Error fetching news:", err));
+    .catch(err => {
+      console.error("Error fetching news:", err);
+      document.getElementById("status").textContent = "Error fetching news.";
+    });
 }
 
 searchNews();

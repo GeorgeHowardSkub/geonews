@@ -1,21 +1,45 @@
 import logging
 import time
-
+import asyncio
 import logging.config
+
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from datetime import datetime
 from news_fetcher import fetch_headlines
 from location_parser import extract_locations
 from geocoder import get_coordinates
 from logging_config import LOGGING_CONFIG
-
+from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger(__name__)
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    task = asyncio.create_task(fetch_news_periodically())
+    yield
+    task.cancel()
+
+
+async def fetch_news_periodically():
+    while True:
+        try:
+            fetch_news_and_cache("world")
+        except Exception as e:
+            print("Failed to fetch news:", e)
+        await asyncio.sleep(600)
+
+def fetch_news_and_cache(query):
+    print("Fetching fresh news...")
+    articles = fetch_headlines(query)
+    news_cache[query] = articles
+    news_cache["last_updated"] = datetime.utcnow()
+    print(f"Fetched {len(articles)} articles at {news_cache['last_updated']} for {query}")
+
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,6 +51,11 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+news_cache = {
+    "world": [],
+    "last_updated": None
+}
+
 # Serve index.html manually at root
 @app.get("/")
 def root():
@@ -36,7 +65,9 @@ def root():
 def news_with_locations(q: str = "world"):
     start_time = time.time()
     logging.debug(f"Fetching news for query: '{q}'")
-    articles = fetch_headlines(query=q)
+    if q not in news_cache:
+        fetch_news_and_cache(q)
+    articles = news_cache[q]
     logging.debug(f"Fetched {len(articles)} articles")
     results = []
 
